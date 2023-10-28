@@ -3,6 +3,7 @@ import Mathlib.Combinatorics.SimpleGraph.Matching
 import Mathlib.Combinatorics.SimpleGraph.Connectivity
 import Mathlib.Data.Fintype.Card
 import Mathlib.Data.Set.Card
+import Mathlib.Order.SymmDiff
 
 
 def SimpleGraph.Subgraph.Complement {V} (G: SimpleGraph V) (M: G.Subgraph): G.Subgraph :=
@@ -17,8 +18,11 @@ def SimpleGraph.Subgraph.Complement {V} (G: SimpleGraph V) (M: G.Subgraph): G.Su
       intros x y H
       tauto)
 
-def IsMaximum {V} {G: SimpleGraph V} {M: G.Subgraph} (_: M.IsMatching): Prop :=
-  ∀ (M': G.Subgraph), M'.IsMatching → M'.support.ncard ≤ M.support.ncard
+-- Fintype ↑(SimpleGraph.Subgraph.support M')
+
+def IsMaximum {V} [Fintype V] {G: SimpleGraph V} {M M': G.Subgraph} (_: M.IsMatching) (_: M'.IsMatching)
+  [DecidablePred fun x => x ∈ M.support] [DecidablePred fun x => x ∈ M'.support]: Prop :=
+  M'.support.toFinset.card ≤ M.support.toFinset.card
 
 def AlternatingWalk {V} {G: SimpleGraph V} (M1 M2: G.Subgraph) {x y: V} (b: Bool) (W: G.Walk x y): Prop :=
   match b, W with
@@ -32,11 +36,6 @@ def AugmentingPath {V} {G: SimpleGraph V} (M: G.Subgraph) {x y: V} (P: G.Path x 
 
 def XOR (P1 P2: Prop): Prop := P1 ∧ ¬ P2 ∨ ¬ P1 ∧ P2
 
-theorem aux {V} {G: SimpleGraph V} (M: G.Subgraph): ∀ (x y: V), M.Adj x y → G.Adj x y := by
-  induction M
-  simp
-  assumption
-
 def GraphSymmDiff {V} {G: SimpleGraph V} (M1 M2: G.Subgraph): G.Subgraph :=
   SimpleGraph.Subgraph.mk
   (@Set.univ V)
@@ -44,8 +43,8 @@ def GraphSymmDiff {V} {G: SimpleGraph V} (M1 M2: G.Subgraph): G.Subgraph :=
   (by
     intros x y H
     simp [XOR] at H
-    let W1 := aux M1 x y
-    let W2 := aux M2 x y
+    set W1 := M1.adj_sub (v:=x) (w:=y)
+    set W2 := M2.adj_sub (v:=x) (w:=y)
     tauto)
   (by
     intros x y H
@@ -55,11 +54,16 @@ def GraphSymmDiff {V} {G: SimpleGraph V} (M1 M2: G.Subgraph): G.Subgraph :=
     intros x y H
     tauto)
 
+/- instance {V} [Vfin: Fintype V] {G: SimpleGraph V} {M1 M2: G.Subgraph}
+  [M1dec: DecidableRel M1.Adj] [M2dec: DecidableRel M2.Adj]: (DecidableRel (GraphSymmDiff M1 M2).Adj) := by
 
-def aux0 {V} [Finite V] {G: SimpleGraph V} {M1 M2: G.Subgraph} (H1: M1.IsMatching) (H2: M2.IsMatching):
+  sorry
+-/
+
+def aux0 {V} [Fintype V] {G: SimpleGraph V} {M1 M2: G.Subgraph} (H1: M1.IsMatching) (H2: M2.IsMatching)
+  [DecidableRel (GraphSymmDiff M1 M2).Adj]:
   let S := GraphSymmDiff M1 M2
   ∀ (x: V), x ∈ S.verts → S.degree x ≤ 2 := by
-    /- failed to synthesize instance Fintype ↑(SimpleGraph.Subgraph.neighborSet S x) -/
     sorry
 
 /- Is this correct? Does it corresponds to lemma from https://en.wikipedia.org/wiki/Berge%27s_theorem#Proof ? -/
