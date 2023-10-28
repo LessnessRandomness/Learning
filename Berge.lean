@@ -20,9 +20,9 @@ def SimpleGraph.Subgraph.Complement {V} (G: SimpleGraph V) (M: G.Subgraph): G.Su
 
 -- Fintype ↑(SimpleGraph.Subgraph.support M')
 
-def IsMaximum {V} [Fintype V] {G: SimpleGraph V} {M M': G.Subgraph} (_: M.IsMatching) (_: M'.IsMatching)
-  [DecidablePred fun x => x ∈ M.support] [DecidablePred fun x => x ∈ M'.support]: Prop :=
-  M'.support.toFinset.card ≤ M.support.toFinset.card
+def IsMaximum {V} {G: SimpleGraph V} {M: G.Subgraph} (_: M.IsMatching): Prop :=
+  ∀ (M': G.Subgraph) (_: M'.IsMatching),
+  M'.support.encard ≤ M.support.encard
 
 def AlternatingWalk {V} {G: SimpleGraph V} (M1 M2: G.Subgraph) {x y: V} (b: Bool) (W: G.Walk x y): Prop :=
   match b, W with
@@ -54,20 +54,13 @@ def GraphSymmDiff {V} {G: SimpleGraph V} (M1 M2: G.Subgraph): G.Subgraph :=
     intros x y H
     tauto)
 
-/- instance {V} [Vfin: Fintype V] {G: SimpleGraph V} {M1 M2: G.Subgraph}
-  [M1dec: DecidableRel M1.Adj] [M2dec: DecidableRel M2.Adj]: (DecidableRel (GraphSymmDiff M1 M2).Adj) := by
-
-  sorry
--/
-
-def aux0 {V} [Fintype V] {G: SimpleGraph V} {M1 M2: G.Subgraph} (H1: M1.IsMatching) (H2: M2.IsMatching)
-  [DecidableRel (GraphSymmDiff M1 M2).Adj]:
+def aux0 {V} {G: SimpleGraph V} {M1 M2: G.Subgraph} (H1: M1.IsMatching) (H2: M2.IsMatching):
   let S := GraphSymmDiff M1 M2
-  ∀ (x: V), x ∈ S.verts → S.degree x ≤ 2 := by
+  ∀ (x: V), x ∈ S.verts → (S.neighborSet x).encard ≤ 2 := by
     sorry
 
 /- Is this correct? Does it corresponds to lemma from https://en.wikipedia.org/wiki/Berge%27s_theorem#Proof ? -/
-theorem aux1 {V} [Finite V] {G: SimpleGraph V} {M1 M2: G.Subgraph} (H1: M1.IsMatching) (H2: M2.IsMatching):
+theorem aux1 {V} {G: SimpleGraph V} {M1 M2: G.Subgraph} (H1: M1.IsMatching) (H2: M2.IsMatching):
   ∀ (c: (GraphSymmDiff M1 M2).coe.ConnectedComponent),
   (∃ (x: V), ∀ (y: V), Set.Mem y c.supp → x = y) ∨
   (∃ (x: V) (W: G.Walk x x) (b: Bool), W.IsCycle ∧ AlternatingWalk M1 M2 b W ∧ W.toSubgraph = (⊤: G.Subgraph).induce c.supp) ∨ /- some black magic, uff -/
