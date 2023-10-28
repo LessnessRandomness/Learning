@@ -3,7 +3,6 @@ import Mathlib.Combinatorics.SimpleGraph.Matching
 import Mathlib.Combinatorics.SimpleGraph.Connectivity
 import Mathlib.Data.Fintype.Card
 import Mathlib.Data.Set.Card
-import Mathlib.Order.SymmDiff
 
 
 def SimpleGraph.Subgraph.Complement {V} (G: SimpleGraph V) (M: G.Subgraph): G.Subgraph :=
@@ -17,8 +16,6 @@ def SimpleGraph.Subgraph.Complement {V} (G: SimpleGraph V) (M: G.Subgraph): G.Su
     (by
       intros x y H
       tauto)
-
--- Fintype ↑(SimpleGraph.Subgraph.support M')
 
 def IsMaximum {V} {G: SimpleGraph V} {M: G.Subgraph} (_: M.IsMatching): Prop :=
   ∀ (M': G.Subgraph) (_: M'.IsMatching),
@@ -36,7 +33,7 @@ def AugmentingPath {V} {G: SimpleGraph V} (M: G.Subgraph) {x y: V} (P: G.Path x 
 
 def XOR (P1 P2: Prop): Prop := P1 ∧ ¬ P2 ∨ ¬ P1 ∧ P2
 
-def GraphSymmDiff {V} {G: SimpleGraph V} (M1 M2: G.Subgraph): G.Subgraph :=
+def SimpleGraph.Subgraph.SymmDiff {V} {G: SimpleGraph V} (M1 M2: G.Subgraph): G.Subgraph :=
   SimpleGraph.Subgraph.mk
   (@Set.univ V)
   (fun x y => XOR (M1.Adj x y) (M2.Adj x y))
@@ -47,7 +44,7 @@ def GraphSymmDiff {V} {G: SimpleGraph V} (M1 M2: G.Subgraph): G.Subgraph :=
     set W2 := M2.adj_sub (v:=x) (w:=y)
     tauto)
   (by
-    intros x y H
+    intros x _ _
     simp)
   (by
     simp [Symmetric, XOR]
@@ -55,13 +52,64 @@ def GraphSymmDiff {V} {G: SimpleGraph V} (M1 M2: G.Subgraph): G.Subgraph :=
     tauto)
 
 def aux0 {V} {G: SimpleGraph V} {M1 M2: G.Subgraph} (H1: M1.IsMatching) (H2: M2.IsMatching):
-  let S := GraphSymmDiff M1 M2
+  let S := M1.SymmDiff M2
   ∀ (x: V), x ∈ S.verts → (S.neighborSet x).encard ≤ 2 := by
+    simp
+    simp [SimpleGraph.Subgraph.SymmDiff]
+    simp [SimpleGraph.Subgraph.neighborSet]
+    simp [XOR]
+    intro x
+    simp [SimpleGraph.Subgraph.IsMatching] at H1
+    simp [SimpleGraph.Subgraph.IsMatching] at H2
+    set S1 := { w | M1.Adj x w ∧ ¬ M2.Adj x w }
+    set S2 := { w | ¬ M1.Adj x w ∧ M2.Adj x w }
+    have H3: { w | M1.Adj x w ∧ ¬ M2.Adj x w ∨ ¬ M1.Adj x w ∧ M2.Adj x w} = S1 ∪ S2 := by trivial
+    have H4: Disjoint S1 S2 := by
+      simp
+      simp [Disjoint]
+      intros x_1 H4 H5 x_2 H6
+      simp
+      set T1 := H4 H6
+      set T2 := H5 H6
+      simp at T1
+      simp at T2
+      tauto
+    rewrite [H3]
+    rewrite [Set.encard_union_eq H4]
+    clear H3
+    set T1 := { w | M1.Adj x w }
+    set T2 := { w | M2.Adj x w }
+    have H5: S1 = T1 \ T2 := by trivial
+    have H6: S2 = T2 \ T1 := by trivial
+    have H7: S1.encard ≤ T1.encard := by
+      apply Set.encard_le_of_subset
+      intros x_1
+      rewrite [H5]
+      simp
+      tauto
+    have H8: S2.encard ≤ T2.encard := by
+      apply Set.encard_le_of_subset
+      intros x_1
+      rewrite [H6]
+      simp
+      tauto
+    have H9: Set.encard T1 = 1 := by
+      sorry
+    have H10: Set.encard T2 = 1 := by
+      sorry
+    rewrite [H9] at H7
+    rewrite [H10] at H8
+    cases
+    linarith
+    exact?
     sorry
 
-/- Is this correct? Does it corresponds to lemma from https://en.wikipedia.org/wiki/Berge%27s_theorem#Proof ? -/
+
+
+
+
 theorem aux1 {V} {G: SimpleGraph V} {M1 M2: G.Subgraph} (H1: M1.IsMatching) (H2: M2.IsMatching):
-  ∀ (c: (GraphSymmDiff M1 M2).coe.ConnectedComponent),
+  ∀ (c: (M1.SymmDiff M2).coe.ConnectedComponent),
   (∃ (x: V), ∀ (y: V), Set.Mem y c.supp → x = y) ∨
   (∃ (x: V) (W: G.Walk x x) (b: Bool), W.IsCycle ∧ AlternatingWalk M1 M2 b W ∧ W.toSubgraph = (⊤: G.Subgraph).induce c.supp) ∨ /- some black magic, uff -/
   (∃ (x y: V) (W: G.Walk x y) (b: Bool), x ≠ y ∧ W.IsPath ∧ AlternatingWalk M1 M2 b W ∧ W.toSubgraph = (⊤: G.Subgraph).induce c.supp) /- same thing here too -/
