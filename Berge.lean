@@ -56,10 +56,14 @@ def GraphSymmDiff {V} {G: SimpleGraph V} (M1 M2: G.Subgraph): G.Subgraph :=
     tauto)
 
 
-
+def aux0 {V} [Finite V] {G: SimpleGraph V} {M1 M2: G.Subgraph} (H1: M1.IsMatching) (H2: M2.IsMatching):
+  let S := GraphSymmDiff M1 M2
+  ∀ (x: V), x ∈ S.verts → S.degree x ≤ 2 := by
+    /- failed to synthesize instance Fintype ↑(SimpleGraph.Subgraph.neighborSet S x) -/
+    sorry
 
 /- Is this correct? Does it corresponds to lemma from https://en.wikipedia.org/wiki/Berge%27s_theorem#Proof ? -/
-theorem aux0 {V} [Finite V] {G: SimpleGraph V} {M1 M2: G.Subgraph} (H1: M1.IsMatching) (H2: M2.IsMatching):
+theorem aux1 {V} [Finite V] {G: SimpleGraph V} {M1 M2: G.Subgraph} (H1: M1.IsMatching) (H2: M2.IsMatching):
   ∀ (c: (GraphSymmDiff M1 M2).coe.ConnectedComponent),
   (∃ (x: V), ∀ (y: V), Set.Mem y c.supp → x = y) ∨
   (∃ (x: V) (W: G.Walk x x) (b: Bool), W.IsCycle ∧ AlternatingWalk M1 M2 b W ∧ W.toSubgraph = (⊤: G.Subgraph).induce c.supp) ∨ /- some black magic, uff -/
@@ -67,8 +71,6 @@ theorem aux0 {V} [Finite V] {G: SimpleGraph V} {M1 M2: G.Subgraph} (H1: M1.IsMat
   := by
   sorry
 
-/-
 theorem Berge's_lemma {V} [Finite V] {G: SimpleGraph V} {M: SimpleGraph.Subgraph G} (H: M.IsMatching):
-  IsMaximum H ↔ (∀ (x y: V) (P: SimpleGraph.Path G x y), ¬ AugmentingPath M P) := by
+  IsMaximum H ↔ (∀ (x y: V) (P: SimpleGraph.Path G x y) (b: Bool), ¬ AugmentingPath M P) := by
   sorry
--/
