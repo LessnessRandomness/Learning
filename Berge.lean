@@ -176,11 +176,7 @@ theorem aux0 {V} {G: SimpleGraph V} {M1 M2: G.Subgraph} (H1: M1.IsMatching) (H2:
 theorem aux1 {V} {G: SimpleGraph V} (M: G.Subgraph):
   (∀ (x: V), x ∈ M.verts → (M.neighborSet x).encard ≤ 2) →
   ∀ (c: M.coe.ConnectedComponent),
-  (∃ (x: V), ∀ (y: V), Set.Mem y c.supp → x = y) ∨
-  (∃ (x: V) (W: G.Walk x x), W.IsCycle) ∨
-  (∃ (x y: V) (W: G.Walk x y), x ≠ y ∧ W.IsPath) := by
-    intros H c
-
+  ∃ (x y: V) (W: G.Walk x y), W.toSubgraph = (⊤: G.Subgraph).induce c.supp := by
     sorry
 
 /- maybe to remove later, dunno -/
