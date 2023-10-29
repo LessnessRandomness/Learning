@@ -50,7 +50,7 @@ def SimpleGraph.Subgraph.SymmDiff {V} {G: SimpleGraph V} (M1 M2: G.Subgraph): G.
     intros x y H
     tauto)
 
-def aux0 {V} {G: SimpleGraph V} {M1 M2: G.Subgraph} (H1: M1.IsMatching) (H2: M2.IsMatching):
+theorem aux0 {V} {G: SimpleGraph V} {M1 M2: G.Subgraph} (H1: M1.IsMatching) (H2: M2.IsMatching):
   let S := M1.SymmDiff M2
   ∀ (x: V), x ∈ S.verts → (S.neighborSet x).encard ≤ 2 := by
     simp
@@ -173,13 +173,26 @@ def aux0 {V} {G: SimpleGraph V} {M1 M2: G.Subgraph} (H1: M1.IsMatching) (H2: M2.
     apply (add_le_add H7 H8).trans
     apply (add_le_add H9 H10)
 
-theorem aux1 {V} {G: SimpleGraph V} {M1 M2: G.Subgraph} (H1: M1.IsMatching) (H2: M2.IsMatching):
+theorem aux1 {V} {G: SimpleGraph V} (M: G.Subgraph):
+  (∀ (x: V), x ∈ M.verts → (M.neighborSet x).encard ≤ 2) →
+  ∀ (c: M.coe.ConnectedComponent),
+  (∃ (x: V), ∀ (y: V), Set.Mem y c.supp → x = y) ∨
+  (∃ (x: V) (W: G.Walk x x), W.IsCycle) ∨
+  (∃ (x y: V) (W: G.Walk x y), x ≠ y ∧ W.IsPath) := by
+    intros H c
+
+    sorry
+
+/- maybe to remove later, dunno -/
+theorem aux2 {V} {G: SimpleGraph V} {M1 M2: G.Subgraph} (H1: M1.IsMatching) (H2: M2.IsMatching):
   ∀ (c: (M1.SymmDiff M2).coe.ConnectedComponent),
   (∃ (x: V), ∀ (y: V), Set.Mem y c.supp → x = y) ∨
   (∃ (x: V) (W: G.Walk x x) (b: Bool), W.IsCycle ∧ AlternatingWalk M1 M2 b W ∧ W.toSubgraph = (⊤: G.Subgraph).induce c.supp) ∨ /- some black magic, uff -/
   (∃ (x y: V) (W: G.Walk x y) (b: Bool), x ≠ y ∧ W.IsPath ∧ AlternatingWalk M1 M2 b W ∧ W.toSubgraph = (⊤: G.Subgraph).induce c.supp) /- same thing here too -/
   := by
-  sorry
+    intros c
+
+    sorry
 
 theorem Berge's_lemma {V} [Finite V] {G: SimpleGraph V} {M: SimpleGraph.Subgraph G} (H: M.IsMatching):
   IsMaximum H ↔ (∀ (x y: V) (P: SimpleGraph.Path G x y) (b: Bool), ¬ AugmentingPath M P) := by
