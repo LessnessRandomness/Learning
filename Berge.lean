@@ -1,4 +1,3 @@
-import Mathlib.Init.Function
 import Mathlib.Combinatorics.SimpleGraph.Matching
 import Mathlib.Combinatorics.SimpleGraph.Connectivity
 import Mathlib.Data.Fintype.Card
@@ -80,7 +79,11 @@ def aux0 {V} {G: SimpleGraph V} {M1 M2: G.Subgraph} (H1: M1.IsMatching) (H2: M2.
     set T1 := { w | M1.Adj x w }
     set T2 := { w | M2.Adj x w }
     have H5: S1 = T1 \ T2 := by trivial
-    have H6: S2 = T2 \ T1 := by trivial
+    have H6: S2 = T2 \ T1 := by
+      rewrite [Set.ext_iff]
+      intro x0
+      simp
+      tauto
     have H7: S1.encard ≤ T1.encard := by
       apply Set.encard_le_of_subset
       intros x_1
@@ -93,20 +96,82 @@ def aux0 {V} {G: SimpleGraph V} {M1 M2: G.Subgraph} (H1: M1.IsMatching) (H2: M2.
       rewrite [H6]
       simp
       tauto
-    have H9: Set.encard T1 = 1 := by
-      sorry
-    have H10: Set.encard T2 = 1 := by
-      sorry
-    rewrite [H9] at H7
-    rewrite [H10] at H8
-    cases
-    linarith
-    exact?
-    sorry
-
-
-
-
+    have H9: Set.encard T1 <= 1 := by
+      clear H7 H6 H5
+      revert T1
+      simp
+      cases (em (x ∈ M1.verts)) with
+      | inl h => have HH: Set.encard { w | M1.Adj x w } = 1 := by
+                   set H9 := H1 h
+                   rewrite [Set.encard_eq_one]
+                   cases H9 with | intro w h0 =>
+                   cases h0 with | intro left right =>
+                   simp at right
+                   exists w
+                   cases H9 with | intro w0 h1 =>
+                   simp at h1
+                   cases h1 with | intro left0 right0 =>
+                   rewrite [Set.ext_iff]
+                   intros x2
+                   simp
+                   constructor
+                   . tauto
+                   . intro H10
+                     rewrite [H10]
+                     assumption
+                 rewrite [HH]
+                 trivial
+      | inr h => have HH: { w | M1.Adj x w} = ∅ := by
+                   rewrite [Set.ext_iff]
+                   simp
+                   intros x_1 H9
+                   apply h
+                   induction M1 with | mk verts Adj adj_sub edge_vert symm =>
+                   simp at H9
+                   simp
+                   apply edge_vert
+                   exact H9
+                 rewrite [HH]
+                 simp
+    have H10: Set.encard T2 <= 1 := by
+      clear H6 H8 H5
+      revert T2
+      simp
+      cases (em (x ∈ M2.verts)) with
+      | inl h => have HH: Set.encard { w | M2.Adj x w } = 1 := by
+                   set H9 := H2 h
+                   rewrite [Set.encard_eq_one]
+                   cases H9 with | intro w h0 =>
+                   cases h0 with | intro left right =>
+                   simp at right
+                   exists w
+                   cases H9 with | intro w0 h1 =>
+                   simp at h1
+                   cases h1 with | intro left0 right0 =>
+                   rewrite [Set.ext_iff]
+                   intros x2
+                   simp
+                   constructor
+                   . tauto
+                   . intro H10
+                     rewrite [H10]
+                     assumption
+                 rewrite [HH]
+                 trivial
+      | inr h => have HH: { w | M2.Adj x w } = ∅ := by
+                   rewrite [Set.ext_iff]
+                   simp
+                   intros x_1 H9
+                   apply h
+                   induction M2 with | mk verts Adj adj_sub edge_vert symm =>
+                   simp at H9
+                   simp
+                   apply edge_vert
+                   exact H9
+                 rewrite [HH]
+                 simp
+    apply (add_le_add H7 H8).trans
+    apply (add_le_add H9 H10)
 
 theorem aux1 {V} {G: SimpleGraph V} {M1 M2: G.Subgraph} (H1: M1.IsMatching) (H2: M2.IsMatching):
   ∀ (c: (M1.SymmDiff M2).coe.ConnectedComponent),
