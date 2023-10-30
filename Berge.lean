@@ -173,25 +173,57 @@ theorem aux0 {V} {G: SimpleGraph V} {M1 M2: G.Subgraph} (H1: M1.IsMatching) (H2:
     apply (add_le_add H7 H8).trans
     apply (add_le_add H9 H10)
 
-theorem aux1 {V} {G: SimpleGraph V} (M: G.Subgraph):
+theorem encard_aux0 {V} (S: Set V) (H: S.encard ≤ 2):
+  S.encard = 0 ∨ S.encard = 1 ∨ S.encard = 2 := by
+  set H0 := @Set.encard_le_coe_iff _ S 2
+  simp at H0
+  cases H0 with | intro mp mpr =>
+  set H1 := mp H
+  clear mpr H0
+  cases H1 with | intro left right =>
+  cases right with | intro w h =>
+  cases h with | intro left0 right0 =>
+  have H2: w = 0 ∨  w = 1 ∨ w = 2 := by
+    cases w with
+    | zero => tauto
+    | succ n => cases n with
+                | zero => tauto
+                | succ n => cases n with
+                            | zero => tauto
+                            | succ n => simp
+                                        trivial
+  cases H2 with
+  | inl h => rewrite [h] at left0
+             simp at left0
+             rewrite [left0]
+             simp
+  | inr h => cases h with
+             | inl h => rewrite [h] at left0
+                        simp at left0
+                        tauto
+             | inr h => rewrite [h] at left0
+                        simp at left0
+                        tauto
+
+theorem aux1 {V} [F: Fintype V] [D: DecidableEq V] {G: SimpleGraph V} (M: G.Subgraph):
   (∀ (x: V), x ∈ M.verts → (M.neighborSet x).encard ≤ 2) →
   ∀ (c: M.coe.ConnectedComponent),
   ∃ (x y: V) (W: G.Walk x y), W.IsTrail ∧ W.toSubgraph = (⊤: G.Subgraph).induce c.supp := by
-    intro H c
+    intros H
 
     sorry
 
 /- maybe to remove later, dunno -/
-theorem aux2 {V} {G: SimpleGraph V} {M1 M2: G.Subgraph} (H1: M1.IsMatching) (H2: M2.IsMatching):
+theorem aux3 {V} {G: SimpleGraph V} {M1 M2: G.Subgraph} (H1: M1.IsMatching) (H2: M2.IsMatching):
   ∀ (c: (M1.SymmDiff M2).coe.ConnectedComponent),
   (∃ (x: V), ∀ (y: V), Set.Mem y c.supp → x = y) ∨
   (∃ (x: V) (W: G.Walk x x) (b: Bool), W.IsCycle ∧ AlternatingWalk M1 M2 b W ∧ W.toSubgraph = (⊤: G.Subgraph).induce c.supp) ∨ /- some black magic, uff -/
   (∃ (x y: V) (W: G.Walk x y) (b: Bool), x ≠ y ∧ W.IsPath ∧ AlternatingWalk M1 M2 b W ∧ W.toSubgraph = (⊤: G.Subgraph).induce c.supp) /- same thing here too -/
   := by
     intros c
-
     sorry
 
-theorem Berge's_lemma {V} [Finite V] {G: SimpleGraph V} {M: SimpleGraph.Subgraph G} (H: M.IsMatching):
+theorem Berge's_lemma {V} [F: Fintype V] [D: DecidableEq V] {G: SimpleGraph V} {M: SimpleGraph.Subgraph G} (H: M.IsMatching):
   IsMaximum H ↔ (∀ (x y: V) (P: SimpleGraph.Path G x y) (b: Bool), ¬ AugmentingPath M P) := by
+
   sorry
