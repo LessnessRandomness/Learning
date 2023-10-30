@@ -184,14 +184,10 @@ theorem encard_aux0 {V} (S: Set V) (H: S.encard ≤ 2):
   cases right with | intro w h =>
   cases h with | intro left0 right0 =>
   have H2: w = 0 ∨  w = 1 ∨ w = 2 := by
-    cases w with
-    | zero => tauto
-    | succ n => cases n with
-                | zero => tauto
-                | succ n => cases n with
-                            | zero => tauto
-                            | succ n => simp
-                                        trivial
+    interval_cases w
+    . trivial
+    . trivial
+    . trivial
   cases H2 with
   | inl h => rewrite [h] at left0
              simp at left0
