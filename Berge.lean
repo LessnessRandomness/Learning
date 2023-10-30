@@ -201,12 +201,28 @@ theorem encard_aux0 {V} (S: Set V) (H: S.encard ≤ 2):
                         simp at left0
                         tauto
 
+theorem encard_aux1 {V} (S: Set V) (H: S.encard ≤ 2):
+  S = ∅ ∨ (∃ x, S = {x}) ∨ (∃ x y, x ≠ y ∧ S = {x, y}) := by
+    set H0 := encard_aux0 S H
+    cases H0 with
+    | inl h => set H1 := (@Set.encard_eq_zero _ S)
+               tauto
+    | inr h => cases h with
+               | inl h => set H1 := (@Set.encard_eq_one _ S)
+                          right
+                          left
+                          tauto
+               | inr h => set H1 := (@Set.encard_eq_two _ S)
+                          right
+                          right
+                          tauto
+
 theorem aux1 {V} [F: Fintype V] [D: DecidableEq V] {G: SimpleGraph V} (M: G.Subgraph):
   (∀ (x: V), x ∈ M.verts → (M.neighborSet x).encard ≤ 2) →
   ∀ (c: M.coe.ConnectedComponent),
   ∃ (x y: V) (W: G.Walk x y), W.IsTrail ∧ W.toSubgraph = (⊤: G.Subgraph).induce c.supp := by
     intros H
-
+    have (∀ (x: V), x ∈ M.verts → )
     sorry
 
 /- maybe to remove later, dunno -/
@@ -217,6 +233,7 @@ theorem aux3 {V} {G: SimpleGraph V} {M1 M2: G.Subgraph} (H1: M1.IsMatching) (H2:
   (∃ (x y: V) (W: G.Walk x y) (b: Bool), x ≠ y ∧ W.IsPath ∧ AlternatingWalk M1 M2 b W ∧ W.toSubgraph = (⊤: G.Subgraph).induce c.supp) /- same thing here too -/
   := by
     intros c
+
     sorry
 
 theorem Berge's_lemma {V} [F: Fintype V] [D: DecidableEq V] {G: SimpleGraph V} {M: SimpleGraph.Subgraph G} (H: M.IsMatching):
