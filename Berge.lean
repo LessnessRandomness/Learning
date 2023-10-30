@@ -220,10 +220,17 @@ theorem encard_aux1 {V} (S: Set V) (H: S.encard ≤ 2):
 theorem aux1 {V} [F: Fintype V] [D: DecidableEq V] {G: SimpleGraph V} (M: G.Subgraph):
   (∀ (x: V), x ∈ M.verts → (M.neighborSet x).encard ≤ 2) →
   ∀ (c: M.coe.ConnectedComponent),
-  ∃ (x y: V) (W: G.Walk x y), W.IsTrail ∧ W.toSubgraph = (⊤: G.Subgraph).induce c.supp := by
+  ∃ (x y: V) (W: G.Walk x y), W.IsTrail ∧ W.toSubgraph = M.induce c.supp := by
     intros H
-    have (∀ (x: V), x ∈ M.verts → )
+    have H0: (∀ (x: V), x ∈ M.verts →
+      M.neighborSet x = ∅ ∨
+      (∃ x1, M.neighborSet x = {x1}) ∨
+      (∃ x1 x2, x1 ≠ x2 ∧ M.neighborSet x = {x1, x2})) := by
+        intros x H0
+        exact (encard_aux1 _ (H x H0))
+    clear H
     sorry
+
 
 /- maybe to remove later, dunno -/
 theorem aux3 {V} {G: SimpleGraph V} {M1 M2: G.Subgraph} (H1: M1.IsMatching) (H2: M2.IsMatching):
