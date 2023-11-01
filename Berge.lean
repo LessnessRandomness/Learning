@@ -272,7 +272,7 @@ theorem aux1 {V} [F: Fintype V] [D: DecidableEq V] {G: SimpleGraph V} (M: G.Subg
                      subst right
                      simp [SimpleGraph.Reachable] at left
                      cases left with | intro val =>
-                     sorry
+                     sorry /- ask for help -/
                  . simp [SimpleGraph.Subgraph.coe]
                    simp [SimpleGraph.ConnectedComponent.supp]
                    apply funext
@@ -308,16 +308,14 @@ theorem aux1 {V} [F: Fintype V] [D: DecidableEq V] {G: SimpleGraph V} (M: G.Subg
                        | inr h_4 => subst h_4
                                     tauto
                      cases H4 with
-                     | inl h_4 => clear H2 H1 h_3
+                     | inl h_4 => clear H2 H1 h_3 H3
                                   simp [SimpleGraph.Reachable] at H
                                   cases H with | intro val =>
-
-                                  sorry
-                     | inr h_4 => clear H2 H h_2
+                                  sorry /- ask for help -/
+                     | inr h_4 => clear H2 H h_2 H3
                                   simp [SimpleGraph.Reachable] at H1
                                   cases H1 with | intro val =>
-
-                                  sorry
+                                  sorry /- ask for help -/
     | inr h => sorry
 
 
