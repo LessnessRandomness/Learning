@@ -306,13 +306,135 @@ theorem aux1_subcase_1 {V} {G: SimpleGraph V} (M: G.Subgraph):
                        | @cons _ w1 _ h' p' => simp at h'
                                                tauto
 
-theorem aux1_subcase_2 {V} {G: SimpleGraph V} (M: G.Subgraph):
+theorem aux1_subcase_2 {V} [F: Fintype V] {G: SimpleGraph V} (M: G.Subgraph):
   ∀ (x: V) (H: x ∈ M.verts) (H0: ∃ (y: V), M.neighborSet x = {y}),
   ∃ (z: V) (W: G.Walk x z), W.IsTrail ∧
   W.toSubgraph = M.induce (M.coe.connectedComponentMk ⟨x, H⟩).supp := by
-    sorry
+    intros x H
+    have H0: ∃ (n: Nat), M.verts.encard = ↑n := by
+      sorry
+    intros H1
+    cases H0 with | intro w h =>
+    revert M x
+    induction w with
+    | zero => simp
+              intros M x H x_1 H0 H1
+              rewrite [Set.ext_iff] at H1
+              simp at H1
+              exfalso
+              exact (H1 _ H)
+    | succ n ih => simp at *
+                   intros M x H x_1 H0 H1
+                   set M' := M.deleteVerts {x}
+                   have H2: M = M.induce (M'.verts ∪ {x}) := by
+                     apply SimpleGraph.Subgraph.ext
+                     . simp
+                       simp [insert]
+                       simp [Set.insert]
+                       rewrite [Set.ext_iff]
+                       intros x_2
+                       simp
+                       apply Iff.intro
+                       . intros H2
+                         right
+                         assumption
+                       . intros H2
+                         cases H2 with
+                         | inl H2 => subst H2
+                                     assumption
+                         | inr H2 => assumption
+                     . apply funext
+                       intros x_2
+                       apply funext
+                       intros x_3
+                       simp
+                       apply Iff.intro
+                       . intros H2
+                         apply And.intro
+                         . right
+                           cases M with | mk verts Adj adj_sub edge_vert symm =>
+                           simp at *
+                           apply edge_vert
+                           exact H2
+                         . apply And.intro
+                           . right
+                             cases M with | mk verts Adj adj_sub edge_vert symm =>
+                             simp at *
+                             apply edge_vert
+                             simp [Symmetric] at symm
+                             apply (symm H2)
+                           . assumption
+                       . tauto
+                   cases (em (M'.verts = ∅)) with
+                   | inl H3 => rewrite [H3] at H2
+                               simp at H2
+                               clear ih
+                               exists x, SimpleGraph.Walk.nil (u := x)
+                               simp
+                               apply SimpleGraph.Subgraph.ext
+                               . simp
+                                 simp [SimpleGraph.Subgraph.induce] at H2
+                                 cases M with | mk verts Adj adj_sub edge_vert symm =>
+                                 simp at *
+                                 cases H2 with | intro left right =>
+                                 clear H3
+                                 subst left
+                                 simp [SimpleGraph.Subgraph.coe]
+                                 simp [SimpleGraph.ConnectedComponent.supp]
+                                 simp [SimpleGraph.Reachable]
+                                 simp [Lean.Internal.coeM]
+                                 simp [CoeT.coe, CoeHTCT.coe, CoeHTC.coe, CoeOTC.coe, CoeTC.coe]
+                                 simp [Set.iUnion]
+                               . simp [SimpleGraph.singletonSubgraph]
+                                 cases M with | mk verts Adj adj_sub edge_vert symm =>
+                                 simp
+                                 simp [SimpleGraph.Subgraph.induce]
+                                 apply funext
+                                 intros x_2
+                                 apply funext
+                                 intros x_3
+                                 simp
+                                 apply Iff.intro
+                                 . tauto
+                                 . simp [SimpleGraph.Subgraph.coe]
+                                   simp [SimpleGraph.ConnectedComponent.supp]
+                                   simp [SimpleGraph.Reachable]
+                                   simp [Lean.Internal.coeM]
+                                   simp [CoeT.coe, CoeHTCT.coe, CoeHTC.coe, CoeOTC.coe, CoeTC.coe]
+                                   intros x_4 H4 W H5 x_6 H6 W' H7 H8
+                                   subst H5
+                                   subst H7
+                                   simp at H
+                                   simp at H1
+                                   simp [SimpleGraph.Subgraph.induce] at H2
+                                   cases H2 with | intro left right =>
+                                   subst left
+                                   simp at *
+                                   simp at H4
+                                   subst H4
+                                   simp at H6
+                                   subst H6
+                                   cases G with | mk Adj' symm' loopless =>
+                                   simp [Irreflexive] at loopless
+                                   simp at adj_sub
+                                   set H9 := adj_sub H8
+                                   set H10 := loopless _ H9
+                                   assumption
+                   | inr H3 => rewrite [Set.ext_iff] at H3
+                               have H4: ∃ x, x ∈ M'.verts := by
+                                 simp at H3
+                                 cases H3 with | intro w h =>
+                                 exists w
+                               clear H3
+                               cases H4 with | intro w h =>
+                               set H3 := ih M' w h
 
-theorem aux1_subcase_3 {V} {G: SimpleGraph V} (M: G.Subgraph):
+                               sorry
+
+
+
+
+theorem aux1_subcase_3 {V} [F: Fintype V] {G: SimpleGraph V} (M: G.Subgraph):
   ∀ (c: M.coe.ConnectedComponent)
   (H: ∀ x, x ∈ c.supp → ∃ x1 x2, x1 ≠ x2 ∧ M.neighborSet x = {x1, x2}),
   ∃ (x: V) (W: G.Walk x x), W.IsCycle ∧ W.toSubgraph = M.induce c.supp := by
