@@ -217,6 +217,15 @@ theorem encard_aux1 {V} (S: Set V) (H: S.encard ≤ 2):
                           right
                           tauto
 
+#check SimpleGraph.Walk.nil
+
+
+/- theorem aux_walk_0 {V} {G: SimpleGraph V} (M: G.Subgraph):
+  ∀ (x: V), (∀ y, M.Adj x y → False) →
+  ∀ (y: V) (W: G.Walk x y), y = x ∧ W = SimpleGraph.Walk.nil (u:=x) := by
+    sorry
+-/
+
 theorem aux1 {V} [F: Fintype V] [D: DecidableEq V] {G: SimpleGraph V} (M: G.Subgraph):
   (∀ (x: V), x ∈ M.verts → (M.neighborSet x).encard ≤ 2) →
   ∀ (c: M.coe.ConnectedComponent),
@@ -229,7 +238,88 @@ theorem aux1 {V} [F: Fintype V] [D: DecidableEq V] {G: SimpleGraph V} (M: G.Subg
         intros x H0
         exact (encard_aux1 _ (H x H0))
     clear H
-    sorry
+    apply SimpleGraph.ConnectedComponent.ind
+    intros v
+    set H1 := H0 v.1 v.2
+    cases H1 with
+    | inl h => clear H1 H0
+               exists v.1, v.1, SimpleGraph.Walk.nil (u := v.1)
+               apply And.intro
+               . simp
+               . simp
+                 rewrite [Set.ext_iff] at h
+                 simp at h
+                 simp [SimpleGraph.Subgraph.induce]
+                 simp [SimpleGraph.singletonSubgraph]
+                 apply And.intro
+                 . rewrite [Set.ext_iff]
+                   intros x
+                   simp
+                   apply Iff.intro
+                   . intro H
+                     subst H
+                     simp [SimpleGraph.ConnectedComponent.supp]
+                     simp [Lean.Internal.coeM]
+                     simp [SimpleGraph.Subgraph.coe]
+                     exists v.1, v.2
+                   . intro H
+                     simp [SimpleGraph.ConnectedComponent.supp] at H
+                     simp [Lean.Internal.coeM] at H
+                     cases H with | intro w h0 =>
+                     cases h0 with | intro w0 h1 =>
+                     cases h1 with | intro left right =>
+                     simp [CoeT.coe, CoeHTCT.coe, CoeHTC.coe, CoeOTC.coe, CoeTC.coe] at right
+                     subst right
+                     simp [SimpleGraph.Reachable] at left
+                     cases left with | intro val =>
+                     sorry
+                 . simp [SimpleGraph.Subgraph.coe]
+                   simp [SimpleGraph.ConnectedComponent.supp]
+                   apply funext
+                   intros x
+                   apply funext
+                   intros x_1
+                   simp
+                   apply Iff.intro
+                   . tauto
+                   . simp [Lean.Internal.coeM]
+                     intros x_2 h_2 H H0 x_3 h_3 H1 H2 H3
+                     simp [CoeT.coe, CoeHTCT.coe, CoeHTC.coe, CoeOTC.coe, CoeTC.coe] at H0
+                     simp [CoeT.coe, CoeHTCT.coe, CoeHTC.coe, CoeOTC.coe, CoeTC.coe] at H2
+                     subst H0
+                     subst H2
+                     have H2: x ≠ x_1 := by
+                       cases M with | mk verts Adj adj_sub edge_vert symm =>
+                       simp at v h H3 h_2 H h_3 H1
+                       cases G with | mk Adj0 symm0 loopless =>
+                       simp [Irreflexive] at loopless
+                       intros H2
+                       subst H2
+                       simp at adj_sub
+                       set H2 := adj_sub H3
+                       tauto
+                     have H4: x ≠ v ∨ x_1 ≠ v := by
+                       have H5: x ≠ v ∨ x = v := by
+                         tauto
+                       have H6: x_1 ≠ v ∨ x_1 = v := by
+                         tauto
+                       cases H5 with
+                       | inl h_4 => tauto
+                       | inr h_4 => subst h_4
+                                    tauto
+                     cases H4 with
+                     | inl h_4 => clear H2 H1 h_3
+                                  simp [SimpleGraph.Reachable] at H
+                                  cases H with | intro val =>
+
+                                  sorry
+                     | inr h_4 => clear H2 H h_2
+                                  simp [SimpleGraph.Reachable] at H1
+                                  cases H1 with | intro val =>
+
+                                  sorry
+    | inr h => sorry
+
 
 
 /- maybe to remove later, dunno -/
