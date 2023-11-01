@@ -217,15 +217,6 @@ theorem encard_aux1 {V} (S: Set V) (H: S.encard ≤ 2):
                           right
                           tauto
 
-#check SimpleGraph.Walk.nil
-
-
-/- theorem aux_walk_0 {V} {G: SimpleGraph V} (M: G.Subgraph):
-  ∀ (x: V), (∀ y, M.Adj x y → False) →
-  ∀ (y: V) (W: G.Walk x y), y = x ∧ W = SimpleGraph.Walk.nil (u:=x) := by
-    sorry
--/
-
 theorem aux1 {V} [F: Fintype V] [D: DecidableEq V] {G: SimpleGraph V} (M: G.Subgraph):
   (∀ (x: V), x ∈ M.verts → (M.neighborSet x).encard ≤ 2) →
   ∀ (c: M.coe.ConnectedComponent),
