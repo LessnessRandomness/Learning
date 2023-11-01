@@ -217,6 +217,98 @@ theorem encard_aux1 {V} (S: Set V) (H: S.encard ≤ 2):
                           right
                           tauto
 
+theorem aux1_subcase_1 {V} {G: SimpleGraph V} (M: G.Subgraph):
+  ∀ (x: V) (H: x ∈ M.verts), M.neighborSet x = ∅ →
+  ∃ (W: G.Walk x x), W.IsTrail ∧
+  W.toSubgraph = M.induce (M.coe.connectedComponentMk ⟨x, H⟩).supp := by
+    intros v H H0
+    exists SimpleGraph.Walk.nil (u := v)
+    apply And.intro
+    . simp
+    . simp
+      rewrite [Set.ext_iff] at H0
+      simp at H0
+      simp [SimpleGraph.Subgraph.induce]
+      simp [SimpleGraph.singletonSubgraph]
+      apply And.intro
+      . rewrite [Set.ext_iff]
+        intros x
+        simp
+        apply Iff.intro
+        . intro H0
+          subst H0
+          simp [SimpleGraph.ConnectedComponent.supp]
+          simp [Lean.Internal.coeM]
+          simp [SimpleGraph.Subgraph.coe]
+          exists x, H
+        . intro H0
+          simp [SimpleGraph.ConnectedComponent.supp] at H0
+          simp [Lean.Internal.coeM] at H0
+          cases H0 with | intro w h0 =>
+          cases h0 with | intro w0 h1 =>
+          cases h1 with | intro left right =>
+          simp [CoeT.coe, CoeHTCT.coe, CoeHTC.coe, CoeOTC.coe, CoeTC.coe] at right
+          subst right
+          simp [SimpleGraph.Reachable] at left
+          cases left with | intro val =>
+          set W := val.reverse
+          cases W with
+          | nil => simp
+          | @cons _ w1 _ h' p' => exfalso
+                                  apply (H0 w1)
+                                  simp [SimpleGraph.Subgraph.coe] at h'
+                                  assumption
+      . simp [SimpleGraph.Subgraph.coe]
+        simp [SimpleGraph.ConnectedComponent.supp]
+        apply funext
+        intros x
+        apply funext
+        intros x_1
+        simp
+        apply Iff.intro
+        . tauto
+        . simp [Lean.Internal.coeM]
+          intros x_2 h_2 H1 H2 x_3 h_3 H3 H4 H5
+          simp [CoeT.coe, CoeHTCT.coe, CoeHTC.coe, CoeOTC.coe, CoeTC.coe] at H2
+          simp [CoeT.coe, CoeHTCT.coe, CoeHTC.coe, CoeOTC.coe, CoeTC.coe] at H4
+          subst H2
+          subst H4
+          have H2: x ≠ x_1 := by
+            cases M with | mk verts Adj adj_sub edge_vert symm =>
+            simp at *
+            cases G with | mk Adj0 symm0 loopless =>
+            simp [Irreflexive] at loopless
+            intros H2
+            subst H2
+            simp at adj_sub
+            set H4 := adj_sub H5
+            tauto
+          have H4: x ≠ v ∨ x_1 ≠ v := by
+            have H5: x ≠ v ∨ x = v := by tauto
+            have H6: x_1 ≠ v ∨ x_1 = v := by tauto
+            cases H5 with
+            | inl h_4 => tauto
+            | inr h_4 => subst h_4
+                         tauto
+          cases H4 with
+          | inl h_4 => simp [SimpleGraph.Reachable] at H1
+                       cases H1 with | intro val =>
+                       set W := val.reverse
+                       cases W with
+                       | nil => simp at *
+                       | @cons _ w1 _ h' p' => simp at h'
+                                               tauto
+          | inr h_4 => simp [SimpleGraph.Reachable] at H3
+                       cases H3 with | intro val =>
+                       set W := val.reverse
+                       cases W with
+                       | nil => simp at *
+                       | @cons _ w1 _ h' p' => simp at h'
+                                               tauto
+
+
+
+
 theorem aux1 {V} [F: Fintype V] [D: DecidableEq V] {G: SimpleGraph V} (M: G.Subgraph):
   (∀ (x: V), x ∈ M.verts → (M.neighborSet x).encard ≤ 2) →
   ∀ (c: M.coe.ConnectedComponent),
@@ -231,98 +323,7 @@ theorem aux1 {V} [F: Fintype V] [D: DecidableEq V] {G: SimpleGraph V} (M: G.Subg
     clear H
     apply SimpleGraph.ConnectedComponent.ind
     intros v
-    set H1 := H0 v.1 v.2
-    cases H1 with
-    | inl h => clear H1 H0
-               exists v.1, v.1, SimpleGraph.Walk.nil (u := v.1)
-               apply And.intro
-               . simp
-               . simp
-                 rewrite [Set.ext_iff] at h
-                 simp at h
-                 simp [SimpleGraph.Subgraph.induce]
-                 simp [SimpleGraph.singletonSubgraph]
-                 apply And.intro
-                 . rewrite [Set.ext_iff]
-                   intros x
-                   simp
-                   apply Iff.intro
-                   . intro H
-                     subst H
-                     simp [SimpleGraph.ConnectedComponent.supp]
-                     simp [Lean.Internal.coeM]
-                     simp [SimpleGraph.Subgraph.coe]
-                     exists v.1, v.2
-                   . intro H
-                     simp [SimpleGraph.ConnectedComponent.supp] at H
-                     simp [Lean.Internal.coeM] at H
-                     cases H with | intro w h0 =>
-                     cases h0 with | intro w0 h1 =>
-                     cases h1 with | intro left right =>
-                     simp [CoeT.coe, CoeHTCT.coe, CoeHTC.coe, CoeOTC.coe, CoeTC.coe] at right
-                     subst right
-                     simp [SimpleGraph.Reachable] at left
-                     cases left with | intro val =>
-                     set W := val.reverse
-                     cases W with
-                     | nil => simp
-                     | @cons _ w1 _ h' p' => exfalso
-                                             apply (h w1)
-                                             simp [SimpleGraph.Subgraph.coe] at h'
-                                             assumption
-                 . simp [SimpleGraph.Subgraph.coe]
-                   simp [SimpleGraph.ConnectedComponent.supp]
-                   apply funext
-                   intros x
-                   apply funext
-                   intros x_1
-                   simp
-                   apply Iff.intro
-                   . tauto
-                   . simp [Lean.Internal.coeM]
-                     intros x_2 h_2 H H0 x_3 h_3 H1 H2 H3
-                     simp [CoeT.coe, CoeHTCT.coe, CoeHTC.coe, CoeOTC.coe, CoeTC.coe] at H0
-                     simp [CoeT.coe, CoeHTCT.coe, CoeHTC.coe, CoeOTC.coe, CoeTC.coe] at H2
-                     subst H0
-                     subst H2
-                     have H2: x ≠ x_1 := by
-                       cases M with | mk verts Adj adj_sub edge_vert symm =>
-                       simp at v h H3 h_2 H h_3 H1
-                       cases G with | mk Adj0 symm0 loopless =>
-                       simp [Irreflexive] at loopless
-                       intros H2
-                       subst H2
-                       simp at adj_sub
-                       set H2 := adj_sub H3
-                       tauto
-                     have H4: x ≠ v ∨ x_1 ≠ v := by
-                       have H5: x ≠ v ∨ x = v := by
-                         tauto
-                       have H6: x_1 ≠ v ∨ x_1 = v := by
-                         tauto
-                       cases H5 with
-                       | inl h_4 => tauto
-                       | inr h_4 => subst h_4
-                                    tauto
-                     cases H4 with
-                     | inl h_4 => clear H2 H1 h_3 H3
-                                  simp [SimpleGraph.Reachable] at H
-                                  cases H with | intro val =>
-                                  set W := val.reverse
-                                  cases W with
-                                  | nil => simp at *
-                                  | @cons _ w1 _ h' p' => simp at h'
-                                                          tauto
-                     | inr h_4 => clear H2 H h_2 H3
-                                  simp [SimpleGraph.Reachable] at H1
-                                  cases H1 with | intro val =>
-                                  set W := val.reverse
-                                  cases W with
-                                  | nil => simp at *
-                                  | @cons _ w1 _ h' p' => simp at h'
-                                                          tauto
-    | inr h => sorry
-
+    sorry
 
 
 /- maybe to remove later, dunno -/
@@ -333,10 +334,8 @@ theorem aux3 {V} {G: SimpleGraph V} {M1 M2: G.Subgraph} (H1: M1.IsMatching) (H2:
   (∃ (x y: V) (W: G.Walk x y) (b: Bool), x ≠ y ∧ W.IsPath ∧ AlternatingWalk M1 M2 b W ∧ W.toSubgraph = (⊤: G.Subgraph).induce c.supp) /- same thing here too -/
   := by
     intros c
-
     sorry
 
 theorem Berge's_lemma {V} [F: Fintype V] [D: DecidableEq V] {G: SimpleGraph V} {M: SimpleGraph.Subgraph G} (H: M.IsMatching):
   IsMaximum H ↔ (∀ (x y: V) (P: SimpleGraph.Path G x y) (b: Bool), ¬ AugmentingPath M P) := by
-
   sorry
