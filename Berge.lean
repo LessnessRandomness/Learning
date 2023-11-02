@@ -494,8 +494,36 @@ theorem aux1_subcase_2 {V} [F: Fintype V] {G: SimpleGraph V} (M: G.Subgraph):
                                                              cases h with | intro left right =>
                                                              exists left
                                                              constructor
+                                                             cases M with | mk verts Adj adj_sub edge_vert symm =>
+                                                             simp
+                                                             simp at H5
+                                                             simp [Symmetric] at symm
+                                                             have H6 := symm H5
+                                                             constructor
+                                                             . simp at H
+                                                               set H7 := Adj x_2 ↑{val := x, property := H: verts}
+                                                               assumption
+                                                             . constructor
+                                               . intros H7
+                                                 cases H7 with | intro H7 H8 =>
+                                                 cases H8 with | intro val =>
+                                                 rewrite [H2] at H7
+                                                 simp at H7
+                                                 cases H7 with
+                                                 | inl H8 => left
+                                                             assumption
+                                                 | inr H8 => simp at H4
+                                                             right
+                                                             rewrite [<- H4]
+                                                             apply And.intro
+                                                             . assumption
+                                                             . intro H9
+                                                               subst H9
+
+                                                               sorry
+
+
                                                              sorry
-                                               . sorry
                                              . sorry
                                | inr H4 => sorry
 
