@@ -427,9 +427,80 @@ theorem aux1_subcase_2 {V} [F: Fintype V] {G: SimpleGraph V} (M: G.Subgraph):
                                  exists w
                                clear H3
                                cases H4 with | intro w h =>
-                               set H3 := ih M' w h
+                               have H3 := ih M' w h
+                               clear ih
+                               cases (em (M'.verts = {w})) with
+                               | inl H4 => rewrite [Set.ext_iff] at H4
+                                           exists w
+                                           have H5: M.Adj x w := by
+                                             simp at H4
+                                             cases M with | mk verts Adj adj_sub edge_vert symm =>
+                                             simp [SimpleGraph.Subgraph.neighborSet] at H0
+                                             simp
+                                             rewrite [Set.ext_iff] at H0
+                                             simp at H0
+                                             rewrite [H0]
+                                             simp at H2
+                                             simp at H4
+                                             have H6: x_1 = w := by
+                                               rewrite [<- H4]
+                                               simp at H
+                                               apply And.intro
+                                               . apply (@edge_vert _ x)
+                                                 simp [Symmetric] at symm
+                                                 apply symm
+                                                 rewrite [H0]
+                                                 rfl
+                                               . intro H7
+                                                 subst H7
+                                                 have H8: Adj x_1 x_1 := by
+                                                   rewrite [H0]
+                                                   rfl
+                                                 cases G with | mk Adj' symm loopless =>
+                                                 simp [Irreflexive] at loopless
+                                                 simp at adj_sub
+                                                 exact (loopless _ (adj_sub H8))
+                                             subst H6
+                                             rfl
+                                           have H6: G.Adj x w := by
+                                             cases M with | mk verts Adj adj_sub edge_vert symm =>
+                                             apply adj_sub
+                                             simp at H5
+                                             assumption
+                                           exists (SimpleGraph.Walk.cons H6 (SimpleGraph.Walk.nil (u := w)))
+                                           apply And.intro
+                                           . simp
+                                           . simp
+                                             simp [SimpleGraph.ConnectedComponent.supp]
+                                             simp [SimpleGraph.Reachable]
+                                             simp [SimpleGraph.Subgraph.coe]
+                                             simp [Lean.Internal.coeM]
+                                             simp [CoeT.coe, CoeHTCT.coe, CoeHTC.coe, CoeOTC.coe, CoeTC.coe]
+                                             simp [SimpleGraph.Subgraph.induce]
+                                             simp [SimpleGraph.subgraphOfAdj]
+                                             rewrite [Set.ext_iff]
+                                             simp
+                                             apply And.intro
+                                             . intros x_2
+                                               apply Iff.intro
+                                               . intros H7
+                                                 cases H7 with
+                                                 | inl H7 => subst H7
+                                                             exists H
+                                                             constructor
+                                                             constructor
+                                                 | inr H7 => subst H7
+                                                             simp at h
+                                                             cases h with | intro left right =>
+                                                             exists left
+                                                             constructor
+                                                             sorry
+                                               . sorry
+                                             . sorry
+                               | inr H4 => sorry
 
-                               sorry
+
+
 
 
 
