@@ -512,19 +512,87 @@ theorem aux1_subcase_2 {V} [F: Fintype V] {G: SimpleGraph V} (M: G.Subgraph):
                                                  cases H7 with
                                                  | inl H8 => left
                                                              assumption
-                                                 | inr H8 => simp at H4
-                                                             right
-                                                             rewrite [<- H4]
-                                                             apply And.intro
-                                                             . assumption
-                                                             . intro H9
-                                                               subst H9
-
-                                                               sorry
-
-
+                                                 | inr H8 => clear H3
+                                                             have H9: M.verts = {x, w} := by
+                                                               rewrite [Set.ext_iff]
+                                                               intros x_3
+                                                               simp
+                                                               apply Iff.intro
+                                                               . intros H9
+                                                                 sorry
+                                                               . sorry
                                                              sorry
-                                             . sorry
+                                             . apply funext
+                                               intros x_2
+                                               apply funext
+                                               intros x_3
+                                               simp
+                                               apply Iff.intro
+                                               . intros H7
+                                                 cases H7 with
+                                                 | inl H7 => cases H7 with | intro left right =>
+                                                             subst left
+                                                             subst right
+                                                             apply And.intro
+                                                             . exists H
+                                                               constructor
+                                                               constructor
+                                                             . apply And.intro
+                                                               . have H8: w ∈ M.verts := by
+                                                                   have H7: w ∈ (SimpleGraph.Subgraph.deleteVerts M {x}).verts := by
+                                                                     assumption
+                                                                   simp at H7
+                                                                   tauto
+                                                                 exists H8
+                                                                 constructor
+                                                                 apply SimpleGraph.Walk.cons (v := ↑(⟨x, H⟩: {x // x ∈ M.verts}))
+                                                                 . simp
+                                                                   cases M with | mk verts Adj adj_sub edge_vert symm =>
+                                                                   simp at H5
+                                                                   simp
+                                                                   simp [Symmetric] at symm
+                                                                   apply symm
+                                                                   assumption
+                                                                 . apply SimpleGraph.Walk.nil
+                                                               . assumption
+                                                 | inr H7 => cases H7 with | intro left right =>
+                                                             subst left
+                                                             subst right
+                                                             apply And.intro
+                                                             . have H7: w ∈ M.verts := by
+                                                                 have H8: w ∈ (M.deleteVerts {x}).verts := by
+                                                                   assumption
+                                                                 simp at H8
+                                                                 tauto
+                                                               exists H7
+                                                               constructor
+                                                               apply SimpleGraph.Walk.cons (v := ↑(⟨x, H⟩: {x // x ∈ M.verts}))
+                                                               . simp
+                                                                 cases M with | mk verts Adj adj_sub edge_vert symm =>
+                                                                 simp at H5
+                                                                 simp
+                                                                 simp [Symmetric] at symm
+                                                                 apply symm
+                                                                 assumption
+                                                               . apply SimpleGraph.Walk.nil
+                                                             . apply And.intro
+                                                               . exists H
+                                                                 constructor
+                                                                 apply SimpleGraph.Walk.nil
+                                                               . cases M with | mk verts Adj adj_sub edge_vert symm =>
+                                                                 simp at H5
+                                                                 simp
+                                                                 simp [Symmetric] at symm
+                                                                 apply symm
+                                                                 assumption
+                                               . intros H7
+                                                 cases H7 with | intro left right =>
+                                                 cases right with | intro H7 H8 =>
+                                                 cases left with | intro H9 H10 =>
+                                                 cases H7 with | intro H11 H12 =>
+                                                 cases H10 with | intro Wl =>
+                                                 cases H12 with | intro W2 =>
+                                                 sorry
                                | inr H4 => sorry
 
 
