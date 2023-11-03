@@ -1,5 +1,6 @@
 import Mathlib.Combinatorics.SimpleGraph.Matching
 import Mathlib.Combinatorics.SimpleGraph.Connectivity
+import Mathlib.Combinatorics.SimpleGraph.Subgraph
 import Mathlib.Data.Fintype.Card
 import Mathlib.Data.Set.Card
 
@@ -345,6 +346,11 @@ theorem aux_experiment {V} [F: Fintype V] [I: Inhabited V] {G: SimpleGraph V} (M
                              apply (symm H2)
                            . assumption
                        . tauto
+                   set Mp: G.Subgraph := M.deleteVerts {x}
+                   simp at H3
+                   cases (em (⟨x, H2⟩ ∈ c.supp)) with
+                   | inl h => sorry
+                   | inr h => sorry
 
                    sorry
 
