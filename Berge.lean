@@ -354,7 +354,6 @@ theorem aux_experiment {V} [F: Fintype V] [I: Inhabited V] {G: SimpleGraph V} (M
                     . apply SimpleGraph.ConnectedComponent.ind
                       simp
                       intros x H1
-                      simp at H1
                       subst H1
                       simp [SimpleGraph.Subgraph.coe]
                     . rfl
@@ -412,155 +411,43 @@ theorem aux_experiment {V} [F: Fintype V] [I: Inhabited V] {G: SimpleGraph V} (M
                                clear H6
                                exists v.1, v.1, W
                    | inr H5 => cases H5 with
-                               | inl H6 => cases H6 with | intro w h =>
+                               | inl H6 => cases H6 with | intro u H6 =>
+                                           have H7: u ∈ Mp.verts := by
+                                             simp
+                                             apply And.intro
+                                             . cases M with | mk verts Adj adj_sub edge_vert symm =>
+                                               simp [SimpleGraph.Subgraph.neighborSet] at H6
+                                               rewrite [Set.ext_iff] at H6
+                                               simp at H6
+                                               have H7: Adj (↑v) u := by
+                                                 rewrite [H6]
+                                                 rfl
+                                               simp
+                                               simp [Symmetric] at symm
+                                               apply edge_vert
+                                               apply symm
+                                               exact H7
+                                             . cases M with | mk verts Adj adj_sub edge_vert symm =>
+                                               simp [SimpleGraph.Subgraph.neighborSet] at H6
+                                               rewrite [Set.ext_iff] at H6
+                                               simp at H6
+                                               have H7: Adj (↑v) u := by
+                                                 rewrite [H6]
+                                                 rfl
+                                               cases G with | mk Adj symm loopless =>
+                                               simp [Irreflexive] at loopless
+                                               intros H8
+                                               subst H8
+                                               simp at adj_sub
+                                               exact (loopless _ (adj_sub H7))
+                                           set cp := Mp.coe.connectedComponentMk ⟨u, H7⟩
+
                                            sorry
-                               | inr H6 => sorry
+                               | inr H6 => cases H6 with | intro u H6 =>
+                                           cases H6 with | intro w H6 =>
+                                           cases H6 with | intro H6 H7 =>
+                                           sorry
 
-
-
-
-
-
-
-theorem aux1_subcase_2 {V} [F: Fintype V] {G: SimpleGraph V} (M: G.Subgraph):
-  ∀ (x: V) (H: x ∈ M.verts) (H0: ∃ (y: V), M.neighborSet x = {y}),
-  ∃ (z: V) (W: G.Walk x z), W.IsTrail ∧
-  W.toSubgraph = M.induce (M.coe.connectedComponentMk ⟨x, H⟩).supp := by
-    intros x H
-    have H0: ∃ (n: Nat), M.verts.encard = ↑n := by
-      sorry
-    intros H1
-    cases H0 with | intro w h =>
-    revert M x
-    induction w with
-    | zero => simp
-              intros M x H x_1 H0 H1
-              rewrite [Set.ext_iff] at H1
-              simp at H1
-              exfalso
-              exact (H1 _ H)
-    | succ n ih => simp
-                   simp at ih
-
-                   sorry
-
-
-theorem aux1_subcase_3 {V} [F: Fintype V] {G: SimpleGraph V} (M: G.Subgraph):
-  ∀ (c: M.coe.ConnectedComponent)
-  (H: ∀ x, x ∈ c.supp → ∃ x1 x2, x1 ≠ x2 ∧ M.neighborSet x = {x1, x2}),
-  ∃ (x: V) (W: G.Walk x x), W.IsCycle ∧ W.toSubgraph = M.induce c.supp := by
-    sorry
-
-theorem aux1 {V} [F: Fintype V] [D: DecidableEq V] {G: SimpleGraph V} (M: G.Subgraph):
-  (∀ (x: V), x ∈ M.verts → (M.neighborSet x).encard ≤ 2) →
-  ∀ (c: M.coe.ConnectedComponent),
-  ∃ (x y: V) (W: G.Walk x y), W.IsTrail ∧ W.toSubgraph = M.induce c.supp := by
-    intros H
-    have H0: (∀ (x: V), x ∈ M.verts →
-      M.neighborSet x = ∅ ∨
-      (∃ x1, M.neighborSet x = {x1}) ∨
-      (∃ x1 x2, x1 ≠ x2 ∧ M.neighborSet x = {x1, x2})) := by
-        intros x H0
-        exact (encard_aux1 _ (H x H0))
-    clear H
-    intros c
-    cases (em (∃ v, v ∈ c.supp ∧ M.neighborSet v = ∅)) with
-    | inl H1 => cases H1 with | intro v H1 =>
-                cases H1 with | intro left right =>
-                set H1 := aux1_subcase_1 M v.1 v.2 right
-                cases H1 with | intro W H1 =>
-                exists ↑v, ↑v, W
-                cases H1 with | intro left0 right0 =>
-                apply And.intro
-                . assumption
-                . rewrite [right0]
-                  have H1: c = SimpleGraph.connectedComponentMk (SimpleGraph.Subgraph.coe M) v := by
-                    revert c
-                    apply SimpleGraph.ConnectedComponent.ind
-                    intros v_1 H1
-                    simp
-                    simp at H1
-                    apply SimpleGraph.Reachable.symm
-                    assumption
-                  tauto
-    | inr H1 => have H2: ∀ v, v ∈ c.supp → M.neighborSet ↑v ≠ ∅ := by
-                  intros v H2 H3
-                  apply H1
-                  exists v
-                clear H1
-                cases (em (∃ v, v ∈ c.supp ∧ (∃ x, M.neighborSet v = {x}))) with
-                | inl H3 => cases H3 with | intro w H3 =>
-                            cases H3 with | intro left right =>
-                            cases right with | intro x H3 =>
-                            have H4: ∃ y, SimpleGraph.Subgraph.neighborSet M ↑w = {y} := by
-                              exists x
-                            cases (aux1_subcase_2 M w.1 w.2 H4) with | intro w0 H5 =>
-                            cases H5 with | intro W H5 =>
-                            cases H5 with | intro left0 right =>
-                            exists ↑w, w0, W
-                            apply And.intro
-                            . assumption
-                            . rewrite [right]
-                              have H5: c = SimpleGraph.connectedComponentMk (SimpleGraph.Subgraph.coe M) w := by
-                                revert c
-                                apply SimpleGraph.ConnectedComponent.ind
-                                intros v_1 H1
-                                simp
-                                intros H2
-                                apply SimpleGraph.Reachable.symm
-                                assumption
-                              tauto
-                | inr H3 => have H4: ∀ (v: ↑M.verts), v ∈ c.supp → ∃ x y, x ≠ y ∧
-                                                      M.neighborSet v = {x, y} := by
-                              intros v H4
-                              cases v with | mk v0 H5 =>
-                              set H6 := H0 v0 H5
-                              cases H6 with
-                              | inl H7 => exfalso
-                                          set H8 := H2 ⟨v0, H5⟩ H4 H7
-                                          assumption
-                              | inr H7 => clear H6
-                                          cases H7 with
-                                          | inl H7 => exfalso
-                                                      apply H3
-                                                      exists ⟨v0, H5⟩
-                                          | inr H7 => assumption
-                            set H5 := aux1_subcase_3 M c H4
-                            cases H5 with | intro w H6 =>
-                            cases H6 with | intro W H7 =>
-                            exists w, w, W
-                            cases H7 with | intro left right =>
-                            cases left with | mk toIsCircuit support_nodup =>
-                            cases toIsCircuit with | mk toIsTrail ne_nil =>
-                            apply And.intro
-                            . assumption
-                            . assumption
-
-
-/-
-    apply SimpleGraph.ConnectedComponent.ind
-    intros v
-    set H1 := H0 v.1 v.2
-    cases H1 with
-    | inl H2 => clear H1
-                set H3 := aux1_subcase_1 M v.1 v.2 H2
-                cases H3 with | intro W H4 =>
-                exists v.1, v.1, W
-    | inr H2 => cases H2 with
-                | inl H2 => cases H2 with | intro x H2 =>
-                            set H3 := aux1_subcase_2 M v.1 v.2
-                            have H4: ∃ y, SimpleGraph.Subgraph.neighborSet M ↑v = {y} := by
-                              exists x
-                            set H5 := H3 H4
-                            cases H5 with | intro w H6 =>
-                            cases H6 with | intro W H7 =>
-                            exists ↑v, w, W
-                | inr H2 => cases H2 with | intro w1 H2 =>
-                            cases H2 with | intro w2 H2 =>
-                            cases H2 with | intro left right =>
-                            set H2 := aux1_subcase_3 M
-                            sorry
--/
 
 
 /- maybe to remove later, dunno -/
