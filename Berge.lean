@@ -403,12 +403,174 @@ theorem aux_experiment {V} [F: Fintype V] [I: Inhabited V] {G: SimpleGraph V} (M
                        intros x_2
                        simp
                    set Mp: G.Subgraph := M.deleteVerts {↑v}
-                   set H4: Mp.verts.encard = ↑(n + 1) := by
+                   set MpH: ∀ x, x ∈ Mp.verts →
+                            SimpleGraph.Subgraph.neighborSet Mp x = ∅ ∨
+                            (∃ y, SimpleGraph.Subgraph.neighborSet Mp x = {y}) ∨
+                            (∃ y z, y ≠ z ∧ SimpleGraph.Subgraph.neighborSet Mp x = {y, z}) := by
+                     clear ih
+                     intros x Hx
+                     simp at Hx
+                     simp
+                     cases Hx with | intro Hx H4 =>
+                     set H5 := H0 x Hx
+                     cases H5 with
+                     | inl H6 => clear H5
+                                 left
+                                 rewrite [Set.ext_iff] at H6
+                                 rewrite [Set.ext_iff]
+                                 simp at H6
+                                 simp
+                                 intros x_1 H7 H8 Hx_1 H9 H10
+                                 apply H6
+                                 exact H10
+                     | inr H6 => clear H5
+                                 cases H6 with
+                                 | inl H5 => cases H5 with | intro y H6 =>
+                                             cases (em (y = ↑v)) with
+                                             | inl H7 => subst H7
+                                                         left
+                                                         rewrite [Set.ext_iff]
+                                                         simp
+                                                         intros x_1 _ _ Hx_1 H7 H8
+                                                         rewrite [Set.ext_iff] at H6
+                                                         simp at H6
+                                                         rewrite [H6] at H8
+                                                         tauto
+                                             | inr H7 => right
+                                                         left
+                                                         exists y
+                                                         rewrite [Set.ext_iff]
+                                                         rewrite [Set.ext_iff] at H6
+                                                         intros x_1
+                                                         apply Iff.intro
+                                                         . intro H8
+                                                           simp at H8
+                                                           simp at H6
+                                                           simp
+                                                           rewrite [<- H6]
+                                                           tauto
+                                                         . simp
+                                                           intros H8
+                                                           subst H8
+                                                           simp at H6
+                                                           apply And.intro
+                                                           . tauto
+                                                           . apply And.intro
+                                                             . have H8: x_1 ∈ M.verts := by
+                                                                 cases M with | mk verts Adj adj_sub edge_vert symm =>
+                                                                 simp
+                                                                 apply edge_vert
+                                                                 simp at H6
+                                                                 simp [Symmetric] at symm
+                                                                 apply symm
+                                                                 rewrite [H6]
+                                                                 rfl
+                                                               tauto
+                                                             . rewrite [H6]
+                                                               rfl
+                                 | inr H5 => cases H5 with | intro y H5 =>
+                                             cases H5 with | intro z H5 =>
+                                             cases H5 with | intro H5 H6 =>
+                                             cases (em (y = v)) with
+                                             | inl H7 => subst H7
+                                                         right
+                                                         left
+                                                         exists z
+                                                         rewrite [Set.ext_iff]
+                                                         rewrite [Set.ext_iff] at H6
+                                                         simp
+                                                         simp at H6
+                                                         intros x_1
+                                                         apply Iff.intro
+                                                         . simp
+                                                           intros _ _ Hx_1 H7 H8
+                                                           rewrite [H6] at H8
+                                                           tauto
+                                                         . intro H7
+                                                           subst H7
+                                                           apply And.intro
+                                                           . tauto
+                                                           . apply And.intro
+                                                             . have H7: M.Adj x x_1 := by
+                                                                 rewrite [H6]
+                                                                 tauto
+                                                               cases M with | mk verts Adj adj_sub edge_vert symm =>
+                                                               simp
+                                                               simp at H7
+                                                               simp [Symmetric] at symm
+                                                               have H8 := symm H7
+                                                               have H9 := edge_vert H8
+                                                               tauto
+                                                             . rewrite [H6]
+                                                               tauto
+                                             | inr H7 => cases (em (z = v)) with
+                                                         | inl H7 => subst H7
+                                                                     right
+                                                                     left
+                                                                     exists y
+                                                                     rewrite [Set.ext_iff]
+                                                                     rewrite [Set.ext_iff] at H6
+                                                                     simp
+                                                                     simp at H6
+                                                                     intros x_1
+                                                                     apply Iff.intro
+                                                                     . simp
+                                                                       intros _ _ Hx_1 H7 H8
+                                                                       rewrite [H6] at H8
+                                                                       tauto
+                                                                     . intros H7
+                                                                       subst H7
+                                                                       apply And.intro
+                                                                       . tauto
+                                                                       . apply And.intro
+                                                                         . have H7: M.Adj x x_1 := by
+                                                                             rewrite [H6]
+                                                                             tauto
+                                                                           cases M with | mk verts Adj adj_sub edge_vert symm =>
+                                                                           simp
+                                                                           simp at H7
+                                                                           simp [Symmetric] at symm
+                                                                           have H8 := symm H7
+                                                                           have H9 := edge_vert H8
+                                                                           tauto
+                                                                         . rewrite [H6]
+                                                                           tauto
+                                                         | inr h => right
+                                                                    right
+                                                                    exists y, z
+                                                                    apply And.intro
+                                                                    . tauto
+                                                                    . rewrite [<- H6]
+                                                                      rewrite [Set.ext_iff]
+                                                                      intros x_1
+                                                                      simp
+                                                                      apply Iff.intro
+                                                                      . tauto
+                                                                      . intros H8
+                                                                        apply And.intro
+                                                                        . tauto
+                                                                        . apply And.intro
+                                                                          . rewrite [Set.ext_iff] at H6
+                                                                            simp at H6
+                                                                            apply And.intro
+                                                                            . cases M with | mk verts Adj adj_sub edge_vert symm =>
+                                                                              simp
+                                                                              apply edge_vert
+                                                                              apply symm
+                                                                              simp at H8
+                                                                              exact H8
+                                                                            . rewrite [H6] at H8
+                                                                              cases H8 with
+                                                                              | inl H8 => subst H8
+                                                                                          assumption
+                                                                              | inr H8 => subst H8
+                                                                                          assumption
+                                                                          . assumption
+                   have H4: Mp.verts.encard = ↑(n + 1) := by
                      sorry
                    cases (H0 v.1 v.2) with
-                   | inl H5 => set H6 := aux1_subcase_1 M v.1 v.2 H5
+                   | inl H5 => have H6 := aux1_subcase_1 M v.1 v.2 H5
                                cases H6 with | intro W H7 =>
-                               clear H6
                                exists v.1, v.1, W
                    | inr H5 => cases H5 with
                                | inl H6 => cases H6 with | intro u H6 =>
@@ -441,6 +603,7 @@ theorem aux_experiment {V} [F: Fintype V] [I: Inhabited V] {G: SimpleGraph V} (M
                                                simp at adj_sub
                                                exact (loopless _ (adj_sub H7))
                                            set cp := Mp.coe.connectedComponentMk ⟨u, H7⟩
+
 
                                            sorry
                                | inr H6 => cases H6 with | intro u H6 =>
