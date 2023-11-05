@@ -637,15 +637,22 @@ theorem aux_experiment {V} [F: Fintype V] [I: Inhabited V] {G: SimpleGraph V} (M
                                                  have W_2: SimpleGraph.Walk (SimpleGraph.Subgraph.coe M)
                                                            { val := x_2, property := H11.1 }
                                                            { val := u, property := H12} := by
-                                                   /- How to do induction and stuff -/
-                                                   /- induction W_1 doesn't work -/
-
                                                    sorry
-                                                 sorry
+                                                 have H13: M.coe.Adj v ⟨u, H12⟩ := by
+                                                   rewrite [Set.ext_iff] at H6
+                                                   simp at H6
+                                                   simp
+                                                   rewrite [H6]
+                                                   rfl
+                                                 have W_2_rev := W_2.reverse
+                                                 have W_2_rev_cons := SimpleGraph.Walk.cons H13 W_2_rev
+                                                 have W_2_rev_cons_rev := W_2_rev_cons.reverse
+                                                 constructor
+                                                 exact W_2_rev_cons_rev
                                                . intro H10
                                                  cases H10 with | intro x_1 H10 =>
                                                  cases H10 with | intro H11 H12 =>
-
+                                                 
                                                  sorry
                                              .
                                                sorry
