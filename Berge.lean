@@ -403,7 +403,7 @@ theorem aux_experiment {V} [F: Fintype V] [I: Inhabited V] {G: SimpleGraph V} (M
                        intros x_2
                        simp
                    set Mp: G.Subgraph := M.deleteVerts {↑v}
-                   set MpH: ∀ x, x ∈ Mp.verts →
+                   have MpH: ∀ x, x ∈ Mp.verts →
                             SimpleGraph.Subgraph.neighborSet Mp x = ∅ ∨
                             (∃ y, SimpleGraph.Subgraph.neighborSet Mp x = {y}) ∨
                             (∃ y z, y ≠ z ∧ SimpleGraph.Subgraph.neighborSet Mp x = {y, z}) := by
@@ -603,9 +603,52 @@ theorem aux_experiment {V} [F: Fintype V] [I: Inhabited V] {G: SimpleGraph V} (M
                                                simp at adj_sub
                                                exact (loopless _ (adj_sub H7))
                                            set cp := Mp.coe.connectedComponentMk ⟨u, H7⟩
+                                           have H8 := ih Mp cp MpH H4
+                                           cases H8 with | intro x H8 =>
+                                           cases H8 with | intro y H8 =>
+                                           cases H8 with | intro W H8 =>
+                                           exists x, y, W
+                                           apply And.intro
+                                           . tauto
+                                           . cases H8 with | intro H8 H9 =>
+                                             rewrite [H9]
+                                             apply SimpleGraph.Subgraph.ext
+                                             . simp
+                                               rewrite [Set.ext_iff]
+                                               intros x_2
+                                               simp [Lean.Internal.coeM]
+                                               apply Iff.intro
+                                               . intro H10
+                                                 cases H10 with | intro x_1 H10 =>
+                                                 cases H10 with | intro H11 H12 =>
+                                                 exists x_2
+                                                 cases H12 with | intro H12 H13 =>
+                                                 simp [CoeT.coe, CoeHTCT.coe, CoeHTC.coe, CoeOTC.coe, CoeTC.coe] at H13
+                                                 subst H13
+                                                 exists H11.1
+                                                 simp [CoeT.coe, CoeHTCT.coe, CoeHTC.coe, CoeOTC.coe, CoeTC.coe]
+                                                 simp [SimpleGraph.Reachable]
+                                                 simp [SimpleGraph.Reachable] at H12
+                                                 cases H12 with | intro W_1 =>
+                                                 have H12: u ∈ M.verts := by
+                                                   simp at H7
+                                                   tauto
+                                                 clear ih H0 H1 MpH H4 H8 H9
+                                                 have W_2: SimpleGraph.Walk (SimpleGraph.Subgraph.coe M)
+                                                           { val := x_2, property := H11.1 }
+                                                           { val := u, property := H12} := by
+                                                   /- How to do induction and stuff -/
+                                                   /- induction W_1 doesn't work -/
 
+                                                   sorry
+                                                 sorry
+                                               . intro H10
+                                                 cases H10 with | intro x_1 H10 =>
+                                                 cases H10 with | intro H11 H12 =>
 
-                                           sorry
+                                                 sorry
+                                             .
+                                               sorry
                                | inr H6 => cases H6 with | intro u H6 =>
                                            cases H6 with | intro w H6 =>
                                            cases H6 with | intro H6 H7 =>
