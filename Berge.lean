@@ -307,6 +307,63 @@ theorem aux1_subcase_1 {V} {G: SimpleGraph V} (M: G.Subgraph):
                        | @cons _ w1 _ h' p' => simp at h'
                                                tauto
 
+theorem aux2 {V} {G: SimpleGraph V} (M: G.Subgraph) (v: ↑M.verts):
+  ∀ (x y: ↑(SimpleGraph.Subgraph.deleteVerts M {↑v}).verts),
+  SimpleGraph.Walk (SimpleGraph.Subgraph.coe (SimpleGraph.Subgraph.deleteVerts M {↑v})) x y →
+  ∀ (x' y': ↑M.verts), x.1 = x'.1 → y.1 = y'.1 →
+  SimpleGraph.Walk (SimpleGraph.Subgraph.coe M) x' y' := by
+    intros x y W
+    induction W with
+    | @nil u => intros x' y' Hx Hy
+                have H1: x' = y' := by
+                  cases x' with | mk x_val x_property =>
+                  cases y' with | mk y_val y_property =>
+                  simp at *
+                  subst Hx
+                  subst Hy
+                  rfl
+                subst H1
+                refine (@SimpleGraph.Walk.nil _ _ _)
+    | @cons u' v' w' h p ih => intros x'' y'' Hx Hy
+                               have H1: u'.1 ∈ ↑M.verts := by
+                                 cases u' with | mk val property =>
+                                 simp
+                                 simp at property
+                                 tauto
+                               have H2: v'.1 ∈ ↑M.verts := by
+                                 cases v' with | mk val property =>
+                                 simp
+                                 simp at property
+                                 tauto
+                               have H3: SimpleGraph.Adj (SimpleGraph.Subgraph.coe ↑M) ⟨u'.1, H1⟩ ⟨v'.1, H2⟩ := by
+                                 simp
+                                 cases M with | mk verts Adj adj_sub edge_vert symm =>
+                                 simp at h
+                                 simp
+                                 tauto
+                               have H4: ⟨u'.1, H1⟩ = x'' := by
+                                 cases x'' with | mk val property =>
+                                 simp
+                                 simp at Hx
+                                 assumption
+                               subst H4
+                               have H5: w'.1 ∈ ↑M.verts := by
+                                 cases w' with | mk val property =>
+                                 simp
+                                 simp at property
+                                 tauto
+                               have H6: ⟨w'.1, H5⟩ = y'' := by
+                                 cases y'' with | mk val property =>
+                                 simp
+                                 simp at Hy
+                                 assumption
+                               subst H6
+                               have H7: SimpleGraph.Walk (SimpleGraph.Subgraph.coe M) ⟨v'.1, H2⟩ ⟨w'.1, H5⟩ := by
+                                 apply ih
+                                 . simp
+                                 . simp
+                               exact (SimpleGraph.Walk.cons H3 H7)
+
 
 theorem aux_experiment {V} [F: Fintype V] [I: Inhabited V] {G: SimpleGraph V} (M: G.Subgraph):
   (∀ (x: V), x ∈ M.verts → (M.neighborSet x).encard ≤ 2) →
@@ -637,7 +694,11 @@ theorem aux_experiment {V} [F: Fintype V] [I: Inhabited V] {G: SimpleGraph V} (M
                                                  have W_2: SimpleGraph.Walk (SimpleGraph.Subgraph.coe M)
                                                            { val := x_2, property := H11.1 }
                                                            { val := u, property := H12} := by
-                                                   sorry
+                                                   simp at H7
+                                                   clear cp W x y
+                                                   apply aux2
+                                                   . exact W_1
+                                                   . simp
                                                  have H13: M.coe.Adj v ⟨u, H12⟩ := by
                                                    rewrite [Set.ext_iff] at H6
                                                    simp at H6
@@ -652,13 +713,12 @@ theorem aux_experiment {V} [F: Fintype V] [I: Inhabited V] {G: SimpleGraph V} (M
                                                . intro H10
                                                  cases H10 with | intro x_1 H10 =>
                                                  cases H10 with | intro H11 H12 =>
-                                                 
                                                  sorry
-                                             .
-                                               sorry
+                                             . sorry
                                | inr H6 => cases H6 with | intro u H6 =>
                                            cases H6 with | intro w H6 =>
                                            cases H6 with | intro H6 H7 =>
+
                                            sorry
 
 
